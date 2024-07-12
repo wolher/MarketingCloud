@@ -1,0 +1,42 @@
+%%[
+/* Assign Data Extension name */
+SET @CustomerHistoryData = "CustomerData"
+
+/* Retrieve data extension and row columns */
+set @rows = LookupRows(@CustomerHistoryData, "SubscriberKey")
+set @rowCount = RowCount(@rows)
+
+/* Get times */
+set @today = Now()
+set @currentMonth = DatePart(@today, "m")
+set @currentDay = DatePart(@today, "d")
+
+if @rowCount > 0 then 
+  /* Loop through each row */
+  for @i = 1 to @rowCount do 
+    set @row = Row(@rows, @i)    
+    set @subscriberKey = Field(@row, "SubscriberKey")
+    set @signupDate = Field(@row, "SignupDate")
+    set @dateDiff = DateDiff(@today, @signupDate, "Y") 
+
+      /* Determine  message based on the year difference and exact month and day */
+      IF @dateDiff == 1 AND ((@currentMonth == DatePart(@signupDate, "m")) AND (@currentDay == DatePart(@signupDate, "d"))) THEN
+          SET @message = "Happy 1st Anniversary! It's hard to believe that it's been a whole year since you began this beautiful journey together."
+
+      ELSEIF @dateDiff == 2 AND ((@currentMonth == DatePart(@signupDate, "m")) AND (@currentDay == DatePart(@signupDate, "d"))) THEN
+          SET @message = "Happy 2nd Anniversary! Two years have passed, and what a journey it has been."
+
+      ELSEIF @dateDiff == 3 AND ((@currentMonth == DatePart(@signupDate, "m")) AND (@currentDay == DatePart(@signupDate, "d"))) THEN
+          SET @message = "Happy 3rd Anniversary! Three years ago, you both began this amazing journey together."
+      ELSE
+          SET @message = "Looking forward for our first anniversary!"
+      ENDIF
+    next @i
+  ELSE
+    SET @message = "No data found"
+    Output(Concat("Message: ", @message))
+ENDIF
+]%%
+
+<!-- Output the message -->
+<p>%%=v(@message)=%%</p>
