@@ -1,0 +1,32 @@
+
+%%[
+/* Define the Data Extension name */
+SET @dataExtensionName = "CustomerData"
+
+/* Retrieve the data for the specific customer */
+SET @rows = LookupRows(@dataExtensionName, "SubscriberKey")
+
+/* Check if dataextension has data */
+IF RowCount(@rows) > 0 THEN
+    SET @row = Row(@rows, 1)    
+    SET @category = Field(@row, "borrower_type")
+    SET @baseUrl = "https://mysite.com/"
+    /* Conditionally set the URLs and CTAs values  on field property */
+    IF @category == "new_borrowers" THEN
+        SET @dynamicCTAurl = CONCAT(@baseUrl, "lp1.html")
+        SET dynamicCTA = "Get Your Loan Now"
+    ELSEIF @category == "existing_borrowers" THEN
+        SET @dynamicCTAurl = CONCAT(@baseUrl, "lp2.html")
+        SET dynamicCTA = "Get a Better Rate Now"
+    ELSE
+        SET @dynamicCTAurl = CONCAT(@baseUrl, "lp3.html")
+        SET dynamicCTA = "Apply Now"
+    ENDIF
+ELSE
+    /* Default URL and CTA values if no data is found */
+    SET @dynamicCTAurl = CONCAT(@baseUrl, "lp0")
+    SET dynamicCTA = "Learn more"
+ENDIF
+]%%
+
+<a href="%%=v(@dynamicCTAurl)=%%">%%=v(@dynamicCTA)=%%</a>
